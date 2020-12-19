@@ -8,7 +8,7 @@ app.use('/media', express.static(__dirname + '/media'));
 
 app.get('/', (req, res) => {
     res.render('index.ejs');
-});
+});   
 
 app.listen(3000, (err) => {
     if (err) {
