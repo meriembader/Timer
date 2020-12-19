@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Timer Application</title>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+            background-color: greenyellow; 
+        }
+
+        .timer {
+            margin-top: 210px;
+            margin-left: 30%;
+            width: 36%;
+            text-align: center;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 15vw;
+        }
+
+        .minutes {
+            float: left;
+        }
+
+        .seconds {
+            float: right;
+        }
+
+        .seperator {
+            vertical-align: 15%;
+            font-size: 14vw;
+            margin: 0;
+            padding: 0;
+        }
+
+        .triggerDiv {
+            font-size: 5vw;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="timer">
+        <div class="minutes" contenteditable="true">01</div>
+        <span class="seperator">:</span>
+        <div class="seconds" contenteditable="true">00</diV>
+        <div class="triggerDiv">Start</div>
+    </div>
+    <script type="application/javascript">
+        let mins = document.querySelector('.minutes');
+        let scs = document.querySelector('.seconds');
+        let triggerButton = document.querySelector('.triggerDiv');
+        let alarm = new Audio('/media/alarm.mp3');
+
+        // Setting the alarm to autoloop
+        alarm.loop = true;
+
+        mins.addEventListener('DOMCharacterDataModified', function (e) {
+            let value = this.innerHTML;
+            let regEx = new RegExp(/^\d*$/);
+            if (!regEx.test(value) || value < 0 || value > 60 || value.length > 2) {
+                this.innerHTML = e.prevValue;
+            };
+        });
+
+        scs.addEventListener('DOMCharacterDataModified', function (e) {
+            let value = this.innerHTML;
+            let regEx = new RegExp(/^\d*$/);
+            if (!regEx.test(value) || value < 0 || value > 59 || value.length > 2) {
+                this.innerHTML = e.prevValue;
+            };
+        });
+
+        mins.addEventListener("keydown", function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+            }
+        });
+
+        scs.addEventListener("keydown", function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target != mins) {
+                if (mins.innerHTML.length == 1) {
+                    mins.innerHTML = "0" + mins.innerHTML;
+                } else if (mins.innerHTML.length == 0) {
+                    mins.innerHTML = "01";
+                };
+            };
+            if (e.target != scs) {
+                if (scs.innerHTML.length == 1) {
+                    scs.innerHTML = "0" + scs.innerHTML;
+                } else if (scs.innerHTML.length == 0) {
+                    scs.innerHTML = "00";
+                };
+            };
+        });
+
+        triggerButton.addEventListener('click', function (e) {
+            if (this.innerHTML == "Start") {
+                if (mins.innerHTML == "00" && scs.innerHTML == "00") {
+                    alert("Select a proper value!");
+                } else {
+                    this.innerHTML = "Pause";
+                    triggerCountDown();
+                }
+                controlAlarmMusic(0);
+            } else if (this.innerHTML == "Pause") {
+                this.innerHTML = "Start";
+                clearInterval(timer);
+                mins.contentEditable = true;
+                scs.contentEditable = true;
+            } else if (this.innerHTML == "Stop Audio") {
+                this.innerHTML = "Start";
+                mins.innerHTML = "01";
+                controlAlarmMusic(0);
+            }
+        });
+
+        function triggerCountDown() {
+            mins.contentEditable = false;
+            scs.contentEditable = false;
+            controlAlarmMusic(0);
+            timer = setInterval(() => {
+                console.log("Timer is working!");
+                if (mins.innerHTML != "00" || scs.innerHTML != "00") {
+                    scs.innerHTML = mod((parseInt(scs.innerHTML) - 1), 60).toString();
+                    if (scs.innerHTML.length == 1) {
+                        scs.innerHTML = "0" + scs.innerHTML;
+                    };
+                    if (scs.innerHTML == "59") {
+                        mins.innerHTML = (parseInt(mins.innerHTML) - 1).toString();
+                        if (mins.innerHTML.length == 1) {
+                            mins.innerHTML = "0" + mins.innerHTML;
+                        };
+                    };
+                };
+                if (mins.innerHTML == "00" && scs.innerHTML == "00") {
+                    clearInterval(timer);
+                    console.log("Timer has stopped!");
+                    triggerButton.innerHTML = "Stop Audio";
+                    mins.contentEditable = true;
+                    scs.contentEditable = true;
+                    controlAlarmMusic(1);
+                };
+            }, 1000);
+        };
+
+        function controlAlarmMusic(state) {
+            // if state is 1 then play the music, else stop it
+            if (state == 1) {
+                alarm.currentTime = 0;
+                alarm.play();
+            } else {
+                alarm.pause();
+            }
+        }
+
+        // the modulo "%" operation in javascript gives wrong results (negative results instead of positive ones) for negative numbers!
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+    </script>
+</body>
+
+</html>
